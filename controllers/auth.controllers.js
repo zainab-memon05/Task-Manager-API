@@ -8,7 +8,7 @@ module.exports.Registration = async (req, res, next) => {
     if (!existingUser) {
       let users = new User(req.body.user);
       await users.save();
-      res.status(200).send("User Registered Successfully !");
+      res.status(200).json({message :"User Registered Successfully !"});
     } else {
       throw new ExpressError(409, "User already exits with this email");
     }

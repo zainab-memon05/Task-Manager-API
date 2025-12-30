@@ -11,7 +11,7 @@ module.exports.createTasks = async (req, res) => {
       user: req.user.id,
     });
     await task.save();
-    res.send("Task created");
+    res.json({ message : "Task created"});
   };
 
 
@@ -87,7 +87,7 @@ module.exports.getSingleTask = async (req, res) => {
     if (req.user.id !== task.user.toString()) {
       return res.status(403).send("Not the Authorized User");
     }
-    res.send(task);
+    res.json({task});
   };
 
 
@@ -102,7 +102,7 @@ module.exports.updateTask = async (req, res) => {
     }
     let updTask = await Task.findByIdAndUpdate(id, { ...req.body.task });
     console.log(`updated task : ${updTask}`);
-    res.send(updTask);
+    res.json({updTask});
   };
 
 
@@ -113,5 +113,5 @@ module.exports.deleteTask = async (req, res) => {
     const { id } = req.params;
     let task = Task.findById(id);
     await User.findByIdAndDelete(id);
-    res.send("Task Deleted Successfully");
+    res.json({ message : "Task Deleted Successfully"});
   }
