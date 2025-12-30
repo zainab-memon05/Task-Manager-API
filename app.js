@@ -4,20 +4,17 @@ const dotenv = require("dotenv");
 dotenv.config();
 const port = process.env.PORT;
 const mongoose = require("mongoose");
-const path = require("path");
-const engine = require("ejs-mate");
 const authRoutes = require('./routes/auth.routes.js');
 const taskRoutes = require('./routes/task.routes.js');
 const ExpressError = require('./utils/expressError.js');
 
-app.set("view engine", "ejs");
 
-app.set("views", path.join(__dirname, "views"));
+
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.engine("ejs", engine);
 
 main().catch((err) => console.log(err));
 

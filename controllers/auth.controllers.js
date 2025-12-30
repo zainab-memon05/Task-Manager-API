@@ -2,14 +2,6 @@ const User = require('../models/users.models.js');
 const jwt = require('jsonwebtoken');
 const ExpressError = require('../utils/expressError.js');
 
-module.exports.renderRegistrationForm = (req, res) => {
-  res.render("signUp.ejs");
-};
-
-module.exports.renderLoginForm = (req, res) => {
-  res.render("signIn.ejs");
-};
-
 module.exports.Registration = async (req, res, next) => {
     let { email } = req.body.user;
     let existingUser = await User.findOne({ email: email });
@@ -46,4 +38,3 @@ module.exports.Login = async (req, res) => {
     }
   };
 
-  
