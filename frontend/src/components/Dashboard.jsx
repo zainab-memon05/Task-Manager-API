@@ -91,8 +91,6 @@ useEffect(() => {
     setTasks(result?.tasks);
     setTotalPages(result?.meta?.totalPages || 1);
 
-    console.log(result);
-    console.log(result.meta);
     
   }
 
@@ -117,7 +115,6 @@ useEffect(() => {
     });
 
     const data = await res.json();
-    console.log(data);
 
     setTitle("");
     setDescription("");
@@ -131,6 +128,11 @@ useEffect(() => {
   }
 
   async function HandleDelete(taskId) {
+
+    const confirm = window.confirm("Do you really want to delete the task ?");
+
+    if(confirm) {
+
     const response = await fetch(`http://localhost:3000/api/tasks/${taskId}` , {
       method : "DELETE",
       headers : {
@@ -139,14 +141,14 @@ useEffect(() => {
     });
 
     const data = await response.json();
-    console.log(data);
+   
 
     if(response.ok){
       setTasks(tasks.filter((task) => {
         return task._id !== taskId
       }));
     }
-
+  }
   }
 
 
@@ -159,7 +161,7 @@ useEffect(() => {
   setEditDueDate(task.dueDate?.split("T")[0]);
  setIsEditing(true);
 
- console.log(task);
+
 
  }
   
@@ -218,6 +220,7 @@ useEffect(() => {
     </button>
 </div>
         {/* Form Section */}
+        <div className="max-w-full">
         <form className="max-w-6xl mx-auto px-6 py-8 border-b border-gray-200" onSubmit={isEditing ? HandleUpdateTask : HandleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex flex-col">
@@ -273,6 +276,7 @@ useEffect(() => {
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 value={isEditing ? editDueDate : dueDate}
                 onChange={ChangeDueDate}
+                min={new Date().toISOString().split("T")[0]}
               />
             </div>
 
@@ -286,15 +290,15 @@ useEffect(() => {
             </div>
           </div>
         </form>
-
+</div>
     {/* Filter Priority */}
 <div className="max-w-full">
   <div className="grid grid-cols-12">
   <div className="col-span-2">  
   <form className="max-w-sm mx-auto">
-    <label htmlFor="countries" className="block mb-2.5 text-sm font-medium text-heading">Filter by priority</label>
-    <select id="countries" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 border-default-medium rounded-md text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
-    <option selected value="">Select Priority</option>
+    <label htmlFor="priority" className="block mb-2.5 text-sm font-medium text-heading">Filter by priority</label>
+    <select id="priority" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 border-default-medium rounded-md text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
+    <option defaultValue="">Select Priority</option>
     <option value="low">Low</option>
     <option value="medium">Medium</option>
     <option value="high">High</option>
@@ -318,9 +322,9 @@ useEffect(() => {
 {/* filter status */}
   <div className="col-span-2">
   <form className="max-w-sm mx-auto">
-    <label htmlFor="countries" className="block mb-2.5 text-sm font-medium text-heading">Filter by Status</label>
-    <select id="countries" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-    <option selected value="">Select Status</option>
+    <label htmlFor="status" className="block mb-2.5 text-sm font-medium text-heading">Filter by Status</label>
+    <select id="status" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
+    <option defaultValue="">Select Status</option>
     <option value="pending">pending</option>
     <option value="in_progress">In Progress</option>
     <option value="completed">Completed</option>
@@ -332,8 +336,9 @@ useEffect(() => {
 {/* From Date */}
 
            <div className="flex flex-col col-span-3">
-              <label className="block mb-2.5 text-sm font-medium text-heading">From Date</label>
+              <label htmlFor="fromDate" className="block mb-2.5 text-sm font-medium text-heading">From Date</label>
               <input
+                id="fromDate"
                 type="date"
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 value={fromDate}
@@ -344,8 +349,9 @@ useEffect(() => {
 {/* To Date  */}
 
             <div className="flex flex-col col-span-3">
-              <label className="block mb-2.5 text-sm font-medium text-heading">To Date</label>
+              <label htmlFor="toDate" className="block mb-2.5 text-sm font-medium text-heading">To Date</label>
               <input
+                id="toDate"
                 type="date"
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                 value={toDate}
@@ -356,9 +362,9 @@ useEffect(() => {
     {/* sort by */}
       <div className="col-span-3">
       <form className="max-w-sm mx-auto">
-        <label htmlFor="countries" className="block mb-2.5 text-sm font-medium text-heading">Sort By</label>
-        <select id="countries" className="block w-full border-gray-300 rounded-md px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-        <option selected value="">Select Sort By</option>
+        <label htmlFor="sortBy" className="block mb-2.5 text-sm font-medium text-heading">Sort By</label>
+        <select id="sortBy" className="block w-full border-gray-300 rounded-md px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+        <option defaultValue="">Select Sort By</option>
         <option value="title">Title</option>
         <option value="description">Description</option>
         <option value="status">Status</option>
@@ -371,8 +377,8 @@ useEffect(() => {
       {/* order */}
       <div className="col-span-3">
        <form className="max-w-sm mx-auto">
-        <label htmlFor="countries" className="block mb-2.5 text-sm font-medium text-heading">Order</label>
-        <select id="countries" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={order} onChange={(e) => setOrder(e.target.value)}>
+        <label htmlFor="order" className="block mb-2.5 text-sm font-medium text-heading">Order</label>
+        <select id="order" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={order} onChange={(e) => setOrder(e.target.value)}>
         <option value="asc">Ascending</option>
         <option value="desc">Descending</option>
         </select>
@@ -405,18 +411,18 @@ useEffect(() => {
         <tbody className="divide-y divide-gray-200">
           {tasks.map((task) => (
             <tr key={task._id} className="hover:bg-gray-50 transition">
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{task.title}</td>
-              <td className="px-6 py-4 text-sm text-gray-700">{task.description}</td>
+              <td className="px-6 py-4 whitespace-nowrap capitalize text-sm font-medium text-gray-900">{task.title}</td>
+              <td className="px-6 py-4 text-sm capitalize text-gray-700">{task.description}</td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                  ${task.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                    task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' : 
+                <span className={`px-2 py-1 capitalize inline-flex text-xs leading-5 font-semibold rounded-full 
+                  ${task.status === 'completed' ? 'bg-green-100 text-green-800 min-w-2.5' : 
+                    task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800 min-w-2.5' : 
                     'bg-gray-100 text-gray-800'}`}>
-                  {task.status}
+                  {task.status === "in_progress" ? "In Progress" : task.status}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                <span className={`px-2 py-1 capitalize inline-flex text-xs leading-5 font-semibold rounded-full 
                   ${task.priority === 'high' ? 'bg-red-100 text-red-800' : 
                     task.priority === 'medium' ? 'bg-orange-100 text-orange-800' : 
                     'bg-blue-100 text-blue-800'}`}>
