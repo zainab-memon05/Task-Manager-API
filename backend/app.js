@@ -9,6 +9,7 @@ const taskRoutes = require('./routes/task.routes.js');
 const ExpressError = require('./utils/expressError.js');
 const cors = require('cors')
 
+console.log(`this is the api key of sendgrid ${process.env.SEND_GRID_API_KEY}`);
 
 
 app.use(express.urlencoded({ extended: true }));
@@ -24,7 +25,7 @@ app.use(cors(corsOptions));
 main().catch((err) => console.log(err));
 
 async function main() {
-  await mongoose.connect("mongodb://127.0.0.1:27017/TaskManager");
+  await mongoose.connect(process.env.MONGODB_URL);
 }
 
 app.listen(port, () => {
@@ -46,3 +47,5 @@ app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Something Went Wrong" } = err;
   res.status(statusCode).send(message);
 });
+
+

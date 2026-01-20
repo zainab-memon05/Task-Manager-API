@@ -1,6 +1,11 @@
 const Task = require('../models/tasks.models.js');
 const ExpressError = require('../utils/expressError.js');
 const User = require('../models/users.models.js');
+const mail = require('@sendgrid/mail');
+const dotenv = require('dotenv');
+const path = require('path');
+const { completionEmail } = require('../utils/email.js');
+
 
 module.exports.createTasks = async (req, res) => {
     if (!req.user) {
@@ -114,9 +119,17 @@ module.exports.updateTask = async (req, res) => {
     if (req.user.id !== task.user.toString()) {
       return res.status(403).send("Not the Authorized User");
     }
-    let updTask = await Task.findByIdAndUpdate(id, { ...req.body.task });
+    let updTask = await Task.findByIdAndUpdate(id, { ...req.body.task } , {new : true}).populate('user' , 'name , email');
     console.log(`updated task : ${updTask}`);
     res.json({updTask});
+
+    
+
+    if(updTask.status === "completed" && task.status !== "completed"){
+
+      await completionEmail(updTask);
+      
+   }
   };
 
 

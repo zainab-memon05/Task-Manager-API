@@ -5,13 +5,14 @@ const ExpressError = require('../utils/expressError.js');
 module.exports.Registration = async (req, res, next) => {
     let { email } = req.body.user;
     let existingUser = await User.findOne({ email: email });
-    if (!existingUser) {
-      let users = new User(req.body.user);
-      await users.save();
-      res.status(200).json({message :"User Registered Successfully !"});
-    } else {
+    if (existingUser) {
+      
+    
       throw new ExpressError(409, "User already exits with this email");
     }
+    let users = new User(req.body.user);
+      await users.save();
+      res.status(200).json({message :"User Registered Successfully !"});
   };
 
 
