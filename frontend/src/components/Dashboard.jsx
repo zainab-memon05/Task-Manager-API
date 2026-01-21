@@ -1,5 +1,6 @@
 import { useState , useEffect } from "react";
 import {useNavigate} from "react-router-dom";
+import toast , {Toaster} from "react-hot-toast";
 
 function Dashboard() {
 
@@ -28,6 +29,7 @@ function Dashboard() {
   const [page , setPage] = useState(1);
   const [limit , setLimit] = useState(5);
   const [totalPages , setTotalPages] = useState(1);
+  const [deletingTaskId , setDeletingTaskId] = useState(null);
 
  useEffect(() => {
   fetchTasks();
@@ -97,6 +99,8 @@ useEffect(() => {
   const HandleSubmit = async (e) => {
     e.preventDefault();
 
+    try{
+
     const res = await fetch('http://localhost:3000/api/tasks' , {
       method : "POST",
       headers : {
@@ -116,6 +120,10 @@ useEffect(() => {
 
     const data = await res.json();
 
+    toast.success("A new task was added" , {
+      duration : 3000
+    });
+
     setTitle("");
     setDescription("");
     setStatus("pending");
@@ -124,6 +132,15 @@ useEffect(() => {
 
     fetchTasks();
 
+  }
+
+  catch {
+    toast.error("there was some problem adding the task",
+      {
+        duration : 3000
+      }
+    )
+  }
     
   }
 
@@ -132,6 +149,10 @@ useEffect(() => {
     const confirm = window.confirm("Do you really want to delete the task ?");
 
     if(confirm) {
+
+      setDeletingTaskId(taskId);
+    
+    try {
 
     const response = await fetch(`http://localhost:3000/api/tasks/${taskId}` , {
       method : "DELETE",
@@ -148,6 +169,22 @@ useEffect(() => {
         return task._id !== taskId
       }));
     }
+
+
+    toast('your task was deleted' , {
+      duration : 4000,
+      position : 'top-center',
+      icon : '👍'
+    });
+  }
+  catch{
+    toast.error("There was some problem deleting your task" , {
+      duration : 3000
+    });
+    setDeletingTaskId(null);
+  }
+    
+
   }
   }
 
@@ -169,6 +206,8 @@ useEffect(() => {
 
  const HandleUpdateTask = async (e) => {
   e.preventDefault();
+
+  try {
 
   if(isEditing === true) {
      const editTask = {
@@ -197,7 +236,26 @@ useEffect(() => {
     setEditPriority("low");
     setEditDueDate("");
     setIsEditing(false);
+
+    toast.success("The task was updated",
+      {
+        duration : 3000
+      }
+    );
+
   }
+}
+
+catch{
+
+  toast.error("There was an error updating the task" ,
+    {
+      duration : 3000
+    }
+  )
+
+}
+
  }
 
  function HandleLogOut() {
@@ -209,12 +267,13 @@ useEffect(() => {
 
   return(
     <>
+    <Toaster/>
    <div>
     <div className="flex justify-between">
         <h1 className="text-3xl font-bold text-gray-800 px-6 pt-8 pb-4">Task Manager</h1>
          <button
       onClick={HandleLogOut}
-      className="px-8  bg-red-500 hover:bg-red-600 text-white rounded-md max-h-12 mt-6 "
+      className="px-8  bg-red-500 hover:bg-red-600 text-white rounded-md max-h-12 mt-6 cursor-pointer "
     >
       Logout
     </button>
@@ -283,7 +342,7 @@ useEffect(() => {
             <div className="flex items-end">
               <button
                 type="submit"
-                className="w-full px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="w-full px-6 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
               >
                 {isEditing ? "Edit Task" : "Add Task"}
               </button>
@@ -315,7 +374,7 @@ useEffect(() => {
             <svg className="w-4 h-4 text-body" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/></svg>
         </div>
         <input type="search" id="search" className="block w-full p-3 ps-9 border-gray-300 rounded-md bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" placeholder="Search" required  value={search} onChange={(e) => setSearch(e.target.value)}/>
-        <button type="button" className=" bg-blue-600 hover:bg-blue-800 active:translate-y-0.5 absolute end-1.5 bottom-1.5 text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded text-xs px-3 py-1.5 focus:outline-none">Search</button>
+        <button type="button" className=" bg-blue-600 hover:bg-blue-800 active:translate-y-0.5 absolute end-1.5 bottom-1.5 text-white bg-brand hover:bg-brand-strong box-border border border-transparent focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded text-xs px-3 py-1.5 focus:outline-none cursor-pointer">Search</button>
     </div>
 </form>
 </div>
@@ -433,10 +492,11 @@ useEffect(() => {
                 {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                      <button onClick={() => HandleEdit(task)} className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full">Edit</button>
+                      <button onClick={() => HandleEdit(task)} className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-4 rounded-full cursor-pointer">Edit</button>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                      <button onClick={() => HandleDelete(task._id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">Delete</button>
+                      <button disabled={deletingTaskId === task._id} onClick={() => HandleDelete(task._id)} className= { deletingTaskId === task._id ? "bg-red-400 hover:bg-red-400 text-white font-bold py-2 px-4 rounded-full cursor-not-allowed" :"bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"}>Delete</button> 
+                      
               </td>
             </tr>
           ))}
