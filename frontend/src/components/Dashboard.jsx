@@ -30,6 +30,8 @@ function Dashboard() {
   const [limit , setLimit] = useState(5);
   const [totalPages , setTotalPages] = useState(1);
   const [deletingTaskId , setDeletingTaskId] = useState(null);
+  const [attachment , setAttachment] = useState(null);
+  const [editAttachment , setEditAttachment] = useState(null);
 
  useEffect(() => {
   fetchTasks();
@@ -70,6 +72,13 @@ useEffect(() => {
     setDueDate(e.target.value);
   }
 
+  const ChangeAttachment = (e) => {
+    const file = e.target.files[0];
+    console.log(file);
+     isEditing ? setEditAttachment(file) :
+    setAttachment(file);
+  }
+
   const fetchTasks = async () => {
 
     let query = [];
@@ -99,26 +108,26 @@ useEffect(() => {
   const HandleSubmit = async (e) => {
     e.preventDefault();
 
-    try{
+    try {
+
+    const formData = new FormData();
+    formData.append("task[title]" , title );
+    formData.append("task[description]" , description );
+    formData.append("task[status]" , status);
+    formData.append("task[priority]" , priority);
+    formData.append("task[dueDate]" , dueDate);
+    formData.append("task[attachment]" , attachment);
 
     const res = await fetch('http://localhost:3000/api/tasks' , {
       method : "POST",
       headers : {
-        "Content-Type" : "application/json",
         "Authorization" : `Bearer ${localStorage.getItem('token')}`
       },
-      body : JSON.stringify({
-        task : {
-         title,
-         description,
-         status,
-         priority,
-         dueDate 
-        }
-      }),
+      body : formData
     });
 
     const data = await res.json();
+    console.log(`data that is being added ${data}`);
 
     toast.success("A new task was added" , {
       duration : 3000
@@ -129,10 +138,11 @@ useEffect(() => {
     setStatus("pending");
     setPriority("low");
     setDueDate("");
+    setAttachment(null);
 
     fetchTasks();
 
-  }
+    }
 
   catch {
     toast.error("there was some problem adding the task",
@@ -280,7 +290,7 @@ catch{
 </div>
         {/* Form Section */}
         <div className="max-w-full">
-        <form className="max-w-6xl mx-auto px-6 py-8 border-b border-gray-200" onSubmit={isEditing ? HandleUpdateTask : HandleSubmit}>
+        <form className="max-w-6xl mx-auto px-6 py-8 border-b border-gray-200" onSubmit={isEditing ? HandleUpdateTask : HandleSubmit} encType="multipart/form-data">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-2">Title</label>
@@ -301,6 +311,17 @@ catch{
                 onChange={ChangeDesciption}
               />
             </div>
+
+            <div className="flex flex-col">
+              <label className="text-sm font-medium text-gray-700 mb-2">Add an Attachment</label>
+              <input
+                type="file"
+                name="task[attachment]"
+                className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                onChange={ChangeAttachment}
+              />
+            </div>
+            
 
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -357,7 +378,7 @@ catch{
   <form className="max-w-sm mx-auto">
     <label htmlFor="priority" className="block mb-2.5 text-sm font-medium text-heading">Filter by priority</label>
     <select id="priority" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 border-default-medium rounded-md text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
-    <option defaultValue="">Select Priority</option>
+    <option selected value="">Select Priority</option>
     <option value="low">Low</option>
     <option value="medium">Medium</option>
     <option value="high">High</option>
@@ -383,7 +404,7 @@ catch{
   <form className="max-w-sm mx-auto">
     <label htmlFor="status" className="block mb-2.5 text-sm font-medium text-heading">Filter by Status</label>
     <select id="status" className="block w-full px-3 py-2.5 bg-neutral-secondary-medium border border-gray-300 rounded-md border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-    <option defaultValue="">Select Status</option>
+    <option selected value="">Select Status</option>
     <option value="pending">pending</option>
     <option value="in_progress">In Progress</option>
     <option value="completed">Completed</option>
@@ -464,7 +485,7 @@ catch{
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Due Date</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Edit</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Delete</th>
-
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Attachment</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
@@ -498,6 +519,37 @@ catch{
                       <button disabled={deletingTaskId === task._id} onClick={() => HandleDelete(task._id)} className= { deletingTaskId === task._id ? "bg-red-400 hover:bg-red-400 text-white font-bold py-2 px-4 rounded-full cursor-not-allowed" :"bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full cursor-pointer"}>Delete</button> 
                       
               </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+  {task.attachment ? (() => {
+
+    return (
+      <div className="flex gap-2 items-center">
+        {/*new tab*/}
+        <a
+          href={`http://localhost:3000/${task.attachment}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded cursor-pointer"
+        >
+          View
+        </a>
+
+        {/* Download*/}
+        <a
+          href={`http://localhost:3000/${task.attachment}`}
+          download="my_file"
+          target="_blank"
+          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded cursor-pointer"
+        >
+          Download
+        </a>
+
+      
+      </div>
+    );
+  })() : "No Attachment"}
+</td>
+
             </tr>
           ))}
         </tbody>
