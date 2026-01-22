@@ -5,6 +5,7 @@ const mail = require('@sendgrid/mail');
 const dotenv = require('dotenv');
 const path = require('path');
 const { completionEmail } = require('../utils/email.js');
+const subTask = require('../models/subTasks.models.js');
 
 
 module.exports.createTasks = async (req, res) => {
@@ -15,8 +16,11 @@ module.exports.createTasks = async (req, res) => {
     let task = new Task({
       ...req.body.task,
       user: req.user.id,
+      attachment: req.file ? `uploads/${req.file.filename}` : null
     });
+    
     await task.save();
+    console.log(req.file);
     res.json({ message : "Task created"});
   };
 
@@ -102,7 +106,7 @@ module.exports.getSingleTask = async (req, res) => {
       return res.status(403).send("Not authorized owners");
     }
     const { id } = req.params;
-    let task = await Task.findById(id);
+    let task = await Task.findById(id).populate('subtasks');
     if (req.user.id !== task.user.toString()) {
       return res.status(403).send("Not the Authorized User");
     }

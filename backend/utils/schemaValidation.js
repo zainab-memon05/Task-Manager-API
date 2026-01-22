@@ -16,6 +16,7 @@ module.exports.taskSchema = Joi.object({
     description : Joi.string().max(100).optional(),
     status : Joi.string().valid("pending" , "in_progress" , "completed").required(),
     priority : Joi.string().valid("low" , "medium" , "high").required(),
-    dueDate : Joi.date().min('now').required()
+    dueDate : Joi.date().min('now').required(),
+    attachment : Joi.string().optional()
   }).required()
 });

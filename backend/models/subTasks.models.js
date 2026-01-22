@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
-const taskSchema = new Schema({
+const subTaskSchema = new Schema({
   title : {
     type : String,
-    required : true,
   },
   description : {
     type : String
@@ -12,16 +11,13 @@ const taskSchema = new Schema({
   status : {
     type : String,
     enum : ["pending" , "in_progress" , "completed"],
-    required : true
   },
   priority : {
     type : String,
     enum : ["low" , "medium" , "high"],
-    required : true
   },
   dueDate : {
-    type : Date,
-    required : true
+    type : Date
   },
   attachment : {
     type : String
@@ -29,18 +25,12 @@ const taskSchema = new Schema({
   user : {
     type : Schema.Types.ObjectId,
     ref : 'User'
-  },
-  subtasks : [
-    {
-      type : Schema.Types.ObjectId,
-      ref : 'subTask'
-    }
-  ]
+  }
 } , {
   timestamps : true
+
 });
 
+const subTask = mongoose.model("subTask" , subTaskSchema);
 
-const Task = mongoose.model("Task" , taskSchema);
-
-module.exports = Task;
+module.exports = subTask;

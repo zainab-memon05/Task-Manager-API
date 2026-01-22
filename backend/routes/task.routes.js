@@ -3,8 +3,10 @@ const router = express.Router();
 const taskController = require('../controllers/task.controllers.js');
 const {jwtMiddleware , taskValidation} = require('../middleware/middleware.js');
 const wrapAsync = require('../utils/wrapAsync.js');
+const upload = require('../utils/uploads.js');
 
-router.post('/' , jwtMiddleware , taskValidation , wrapAsync(taskController.createTasks));
+
+router.post('/' , jwtMiddleware , upload.single('task[attachment]') ,taskValidation , wrapAsync(taskController.createTasks));
 
 router.get('/' , jwtMiddleware , wrapAsync(taskController.Filters));
 

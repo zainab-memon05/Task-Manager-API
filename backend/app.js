@@ -6,14 +6,20 @@ const port = process.env.PORT;
 const mongoose = require("mongoose");
 const authRoutes = require('./routes/auth.routes.js');
 const taskRoutes = require('./routes/task.routes.js');
+const subTaskRoutes = require('./routes/subTask.routes.js');
 const ExpressError = require('./utils/expressError.js');
-const cors = require('cors')
+const cors = require('cors');
+const path = require('path');
 
 console.log(`this is the api key of sendgrid ${process.env.SEND_GRID_API_KEY}`);
 
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+
 
 const corsOptions = {
   origin: 'http://localhost:5173',
@@ -36,6 +42,8 @@ app.listen(port, () => {
 app.use('/api/auth' , authRoutes);
 
 app.use('/api/tasks' , taskRoutes);
+
+app.use('/api/tasks/:id/subtask' , subTaskRoutes);
 
 
 
