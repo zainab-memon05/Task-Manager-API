@@ -6,13 +6,13 @@ const wrapAsync = require('../utils/wrapAsync.js');
 const upload = require('../utils/uploads.js');
 
 
-router.post('/' , jwtMiddleware , upload.single('task[attachment]') ,taskValidation , wrapAsync(taskController.createTasks));
+router.post('/' , jwtMiddleware , upload.single('task[attachment]') , taskValidation , wrapAsync(taskController.createTasks));
 
 router.get('/' , jwtMiddleware , wrapAsync(taskController.Filters));
 
 router.get('/:id', jwtMiddleware , wrapAsync(taskController.getSingleTask));
 
-router.put('/:id' , jwtMiddleware , wrapAsync(taskController.updateTask));
+router.put('/:id' , jwtMiddleware , upload.single('task[attachment]') , wrapAsync(taskController.updateTask));
 
 router.delete('/:id' , jwtMiddleware , wrapAsync(taskController.deleteTask));
 

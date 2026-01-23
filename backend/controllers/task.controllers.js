@@ -124,9 +124,11 @@ module.exports.updateTask = async (req, res) => {
       return res.status(403).send("Not the Authorized User");
     }
     let updTask = await Task.findByIdAndUpdate(id, { ...req.body.task } , {new : true}).populate('user' , 'name , email');
-    console.log(`updated task : ${updTask}`);
+    updTask.attachment = req.file ? `uploads/${req.file.filename}` : null;
     res.json({updTask});
 
+    await updTask.save();
+    console.log(req.body.task);
     
 
     if(updTask.status === "completed" && task.status !== "completed"){
