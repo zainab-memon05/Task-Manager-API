@@ -1,4 +1,4 @@
-import { useState , useEffect } from "react";
+import { useState , useEffect, useRef } from "react";
 import {useNavigate} from "react-router-dom";
 import toast , {Toaster} from "react-hot-toast";
 
@@ -45,7 +45,7 @@ useEffect(() => {
   }
 }, [search, filterStatus, filterPriority, fromDate, toDate, sortBy, order]);
 
-
+  const fileInput = useRef(null);
 
   const ChangeTitle = (e) => {
     isEditing ? setEditTitle(e.target.value) :
@@ -74,7 +74,6 @@ useEffect(() => {
 
   const ChangeAttachment = (e) => {
     const file = e.target.files[0];
-    console.log(file);
      isEditing ? setEditAttachment(file) :
     setAttachment(file);
   }
@@ -139,6 +138,8 @@ useEffect(() => {
     setPriority("low");
     setDueDate("");
     setAttachment(null);
+
+    fileInput.current.value = null;
 
     fetchTasks();
 
@@ -206,36 +207,32 @@ useEffect(() => {
   setEditStatus(task.status);
   setEditPriority(task.priority);
   setEditDueDate(task.dueDate?.split("T")[0]);
- setIsEditing(true);
-
+  setEditAttachment(task.attachment);
+  setIsEditing(true);
 
 
  }
   
- 
-
  const HandleUpdateTask = async (e) => {
   e.preventDefault();
 
   try {
 
   if(isEditing === true) {
-     const editTask = {
-        title : editTitle,
-        description : editDescription,
-        status : editStatus,
-        priority : editPriority,
-        dueDate : editDueDate
-    }
+     const formData = new FormData();
+    formData.append("task[title]" , editTitle );
+    formData.append("task[description]" , editDescription );
+    formData.append("task[status]" , editStatus);
+    formData.append("task[priority]" , editPriority);
+    formData.append("task[dueDate]" , editDueDate);
+    formData.append("task[attachment]" , editAttachment);
+
     const res = await fetch(`http://localhost:3000/api/tasks/${editID}`,{
       method : "PUT",
       headers : {
-        "Content-Type" : "application/json",
          "Authorization" : `Bearer ${localStorage.getItem('token')}`
       },
-      body : JSON.stringify({
-        task : editTask
-      })
+      body : formData,
     });
 
     fetchTasks();
@@ -245,6 +242,7 @@ useEffect(() => {
     setEditStatus("pending");
     setEditPriority("low");
     setEditDueDate("");
+    fileInput.current.value = null;
     setIsEditing(false);
 
     toast.success("The task was updated",
@@ -315,6 +313,7 @@ catch{
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-2">Add an Attachment</label>
               <input
+                ref={fileInput}
                 type="file"
                 name="task[attachment]"
                 className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
